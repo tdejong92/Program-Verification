@@ -1,0 +1,81 @@
+class list {
+
+  int val;
+  list next;
+
+  requires p!=none && p<=write;
+  resource state(frac p)=Perm(val,p) ** Perm(next,1) ** next->state(p);   // problem with Perm(next,p)??
+
+  given frac p;
+  requires p!=none && p<=write;
+  requires n->state(p);
+  static seq<int> contents(list n)=
+    n==null?seq<int>{}:(unfolding n.state(p) in (seq<int>{n.val}+(contents(n.next) with {p = p;})));
+
+  requires n->state(1);
+  ensures  state(1);
+  ensures (contents(this) with {p=1;})==seq<int>{v}+(\old(contents(n) with {p=1;}));
+  list(int v,list n){
+    val=v;
+    next=n;
+    fold state(1);
+  }
+ 
+  requires state(1);
+  ensures state(1);
+  void main(){
+    list n=null;
+   list l1;
+   list l1n = null;
+   list l2;
+   list l2n = null;
+   list l3;
+   int lengthl1;
+    assert (contents(n) with {p=1;})==seq<int>{};
+    n=new list(37,n);
+    assert (contents(n) with {p=1;})==seq<int>{37};
+   l1 = new list(1, new list(2, l1n));
+   l2 = new list(3, new list(4, l2n));
+//   l3 = append(l1,l2) with {p = 1;};
+  // assert contents(l3)==seq<int>{1,2,3,4};
+  // lengthl1 = length(l1) with {p = 1/2;};
+  // assert lengthl1==2;
+  }
+
+  //given frac p;
+  //requires p!=none && p<=write;
+  requires l1->state(1) ** l2->state(1) ** Perm(l1.next,1) ** Perm(l2.next,1);
+  // requires write permission over l1 if it exists and read permission over l2 if it exists
+  ensures l1->state(1) ** l2->state(1) ** Perm(l1.next,1) ** Perm(l2.next,1);
+  //ensures (l1==null) ? \result==l2 : (contents(l1) with {p=1;})==(\old(contents(l1) with {p=1;}))+(contents(l2) with {p=p;});
+  list append(list l1,list l2){
+    list n = l1.next;
+    if (l1==null){
+     return l2;
+    } else {
+    assert l1.state(1);
+    assume n!=null;
+    assert n.state(1);
+    assert Perm(l1.next,1);
+    assert Value(l1.next);
+    //  l1.next = l2;
+     l1.next=(append(l1.next,l2));// with {p = 1;});
+     return l1;
+    }
+  }
+ /* 
+  given frac p;
+  requires l.state(p);
+  ensures l.state(p);
+  ensures \result==contents(l).length // DOES LENGTH EXIST ON SEQ(INT)??
+  int getlength(list l){
+    int res;
+    if (l==null){
+      res=0;
+    } else {
+      res=1+getlength(l.next) with { p = p; };
+    }
+    return res;
+  }
+*/
+}
