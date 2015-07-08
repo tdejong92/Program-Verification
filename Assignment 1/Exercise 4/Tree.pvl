@@ -28,13 +28,17 @@ class tree {
     this.right=right;
   fold state();
   }
-/*
+
   static int f(int x)=x*2;
 
   static boolean mapf(seq<int>l1,seq<int> l2)= |l1| == |l2| &&
     (\forall int i; 0 <= i && i < |l1| ; l1[i]==f(l2[i]));
 
+  requires state();
+  ensures state();
+  ensures mapf(contents(),\old(contents()));
   void map_sequential(){
+  unfold state();
     if (left!=null){
         left.map_sequential();
     }
@@ -42,8 +46,9 @@ class tree {
     if (right!=null){
         right.map_sequential();
     }
+  fold state();
   }
-
+/*
   void map_parallel(){
     task t=new task(this);
     t.run();
