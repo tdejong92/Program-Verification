@@ -6,6 +6,9 @@ class tree {
   resource state() = Perm(val,1) ** Perm(left,1) ** left->state() ** Perm(right,1) ** right->state();
 
   requires state();
+  seq<int> contents()=unfolding state() in (left==null?(right==null?seq<int>{val}:seq<int>{val}+right.contents()):(right==null?seq<int>{val}+left.contents():seq<int>{val}+left.contents()+right.contents()));
+
+  requires state();
   int get_val()=unfolding state() in (val);
 
   requires state();
