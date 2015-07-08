@@ -52,15 +52,22 @@ class tree {
   void map_parallel(){
     task t=new task(this);
     t.run();
-  }
+  }*/
 }
 class task {
   tree t;
 
+  resource state() = Value(t) ** t->state();
+
+  requires t->state();
+  ensures state();
   task(tree t){
     this.t=t;
+    fold state();
   }
- 
+
+  requires state() ** t->state() ** Value(t.left) ** t.left.state();
+  ensures state() ** t->state() ** Value(t.left) ** t.left.state(); 
   void run(){
     if (t!=null) {
       task t1=new task(t.left);  fork t1;
@@ -71,5 +78,5 @@ class task {
       join t1;
       join t2;
     }
-  }*/
+  }
 }
