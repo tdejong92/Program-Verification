@@ -27,13 +27,9 @@ class Set {
 		}
 		fold(state(1));
 	}
-
 	requires state(1);
-	requires x!=null ** Value(x.max) ** x.max>0 ** Value(x.contents);
-	requires (\forall int k; 0<= k && k < x.max ; Value(x.contents[k]));
+	requires x!=null ** Value(x.max) ** Value(x.contents) ** (\forall int k; 0<=k && k<x.max; Value(x.contents[k]));
 	ensures state(1);
-//	ensures (max<=x.max) ==> (\forall int k; 0<= k && k < max ; contents[k]==( contents[k] && x.contents[k] ) );
-// : ( (\forall int k; 0<= k && k < x.max ; contents[k]==( contents[k] && x.contents[k] ) ) && (\forall int k; k>=x.max && k < max ; !contents[k] ) );
 	void intersection(Set x){
 
 		int i=0;	
@@ -41,49 +37,24 @@ class Set {
 
 		if(max<=x.max) {
 			loop_invariant state(1);
-			loop_invariant x!=null ** Value(x.max) ** x.max>0 ** Value(x.contents);
-			loop_invariant x.max>=max;
-			loop_invariant (\forall int k; 0<= k && k < x.max ; Value(x.contents[k]));
 			loop_invariant 0<=i && i<=max;
-			loop_invariant (\forall int k; 0<= k && k < i ; contents[k]==( contents[k] && x.contents[k] ) );
-			while(i<max){
-				contents[i] = ( contents[i] && x.contents[i] ) ;
+			loop_invariant x!=null ** Value(x.max) ** Value(x.contents) ** (\forall int k; k>=0 && k<x.max; Value(x.contents[k]));
+			loop_invariant max<=x.max;
+			while(i<max){	
+				contents[i] = ( contents[i] );//&& x.contents[i] ) ;
 				i=i+1;
 			}
-
-
 		} else {
-			/* max > x.max */ 
-			loop_invariant state(1);
-			loop_invariant x!=null ** Value(x.max) ** x.max>0 ** Value(x.contents);
-			loop_invariant max > x.max;
-			loop_invariant j>=0 && j<=x.max;			
-			loop_invariant (\forall int k; 0<= k && k < x.max ; Value(x.contents[k]));
-			loop_invariant (\forall int k; 0<= k && k < j ; contents[k]==( contents[k] && x.contents[k] ) );
+			assume false;
 			while(j<x.max){
 				contents[j] = ( contents[j] && x.contents[j] ) ;
 				j=j+1;
 			}
-			assert (\forall int k; 0<= k && k < x.max ; contents[k]==( contents[k] && x.contents[k] ) );
-
-			loop_invariant state(1);
-			loop_invariant x!=null ** Value(x.max) ** x.max>0 ** Value(x.contents);
-			loop_invariant max > x.max;
-			loop_invariant j>=x.max && j<=max;
-			loop_invariant (\forall int k; 0<= k && k < x.max ; Value(x.contents[k]));
-			//loop_invariant (\forall int k; 0<= k && k < x.max ; contents[k]==( contents[k] && x.contents[k] ) );
-			loop_invariant (\forall int k; k>=x.max && k < j ; !contents[k] );
 			while(j<max) {
 				contents[j]=false;
 				j=j+1;
-			}
-			//assert (\forall int k; 0<= k && k < x.max ; contents[k]==( contents[k] && x.contents[k] ) );
-									
+			}				
 		}
-		assume (max>x.max) ==> (\forall int k; 0<= k && k < x.max ; contents[k]==(contents[k] && x.contents[k]));
-		assert (max<=x.max) ==> (\forall int k; 0<= k && k < max ; contents[k]==(contents[k] && x.contents[k]));
-		assert (max>x.max) ==> (\forall int k; 0<= k && k < x.max ; contents[k]==(contents[k] && x.contents[k]));
-		assert (max>x.max) ==> (\forall int k; k>=x.max && k < max ; !contents[k]);
-	}			
+	}
 }
 
