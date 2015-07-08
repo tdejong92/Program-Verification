@@ -1,0 +1,29 @@
+requires state(1);
+requires x!=null, Value(x.max) ** Value(x.contents) ** Value(x.contents[i]);
+ensures state(1);
+void intersection(Set x){
+
+	int i=0;	
+	int j=0;
+
+	if(max<=x.max) {
+		loop_invariant state(1);
+		loop_invariant 0<=i && i<=max;
+		loop_invariant x!=null ** Value(x.contents) ** Value(x.contents[i]);
+		while(i<max){
+			contents[i] = ( contents[i] && x.contents[i] ) ;
+			i=i+1;
+		}
+
+	} else {
+		assume false;
+		while(j<x.max){
+			contents[j] = ( contents[j] && x.contents[j] ) ;
+			j=j+1;
+		}
+		while(j<max) {
+			contents[j]=false;
+			j=j+1;
+		}				
+	}
+}
