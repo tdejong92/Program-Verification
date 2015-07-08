@@ -3,16 +3,29 @@ class tree {
   tree left;
   tree right;
 
-  int get_val()=val;
-  tree get_left()=left;
-  tree get_right()=right;
+  resource state() = Perm(val,1) ** Perm(left,1) ** left->state() ** Perm(right,1) ** right->state();
 
+  requires state();
+  int get_val()=unfolding state() in (val);
+
+  requires state();
+  tree get_left()=unfolding state() in (left);
+
+  requires state();
+  tree get_right()=unfolding state() in (right);
+
+  requires left->state() ** right->state();
+  ensures state();
+  ensures get_left()==left;
+  ensures get_val()==val;
+  ensures get_right()==right;
   tree(tree left,int val,tree right){
     this.left=left;
     this.val=val;
     this.right=right;
+  fold state();
   }
-
+/*
   static int f(int x)=x*2;
 
   static boolean mapf(seq<int>l1,seq<int> l2)= |l1| == |l2| &&
@@ -50,5 +63,5 @@ class task {
       join t1;
       join t2;
     }
-  }
+  }*/
 }
