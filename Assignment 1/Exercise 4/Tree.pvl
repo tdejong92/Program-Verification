@@ -1,0 +1,54 @@
+class tree {
+  int val;
+  tree left;
+  tree right;
+
+  int get_val()=val;
+  tree get_left()=left;
+  tree get_right()=right;
+
+  tree(tree left,int val,tree right){
+    this.left=left;
+    this.val=val;
+    this.right=right;
+  }
+
+  static int f(int x)=x*2;
+
+  static boolean mapf(seq<int>l1,seq<int> l2)= |l1| == |l2| &&
+    (\forall int i; 0 <= i && i < |l1| ; l1[i]==f(l2[i]));
+
+  void map_sequential(){
+    if (left!=null){
+        left.map_sequential();
+    }
+    val=f(val);
+    if (right!=null){
+        right.map_sequential();
+    }
+  }
+
+  void map_parallel(){
+    task t=new task(this);
+    t.run();
+  }
+}
+class task {
+  tree t;
+
+  task(tree t){
+    this.t=t;
+  }
+ 
+  void run(){
+    if (t!=null) {
+      task t1=new task(t.left);  fork t1;
+      task t2=new task(t.right); fork t2;
+
+      t.val=t.f(t.val);
+
+      join t1;
+      join t2;
+    }
+  }
+}
