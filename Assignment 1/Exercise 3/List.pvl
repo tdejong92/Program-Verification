@@ -14,6 +14,8 @@ class list {
 
   requires n->state(1);
   ensures  state(1);
+//  ensures val==v; WHY IS THIS NOT POSSIBLE?
+//  ensures next==n;
   ensures (contents(this) with {p=1;})==seq<int>{v}+(\old(contents(n) with {p=1;}));
   list(int v,list n){
     val=v;
@@ -41,41 +43,40 @@ class list {
   // lengthl1 = length(l1) with {p = 1/2;};
   // assert lengthl1==2;
   }
-
-  //given frac p;
-  //requires p!=none && p<=write;
-  requires l1->state(1) ** l2->state(1) ** Perm(l1.next,1) ** Perm(l2.next,1);
+/*
+  given frac p;
+  requires p!=none && p<=write;
+  requires l1->state(1) ** l2->state(p) ** Perm(l1.next,1) ** Perm(l2.next,p);
   // requires write permission over l1 if it exists and read permission over l2 if it exists
-  ensures l1->state(1) ** l2->state(1) ** Perm(l1.next,1) ** Perm(l2.next,1);
-  //ensures (l1==null) ? \result==l2 : (contents(l1) with {p=1;})==(\old(contents(l1) with {p=1;}))+(contents(l2) with {p=p;});
+  ensures l1->state(1) ** l2->state(p) ** Perm(l1.next,1) ** Perm(l2.next,p);
+  ensures (l1==null) ? \result==l2 : (contents(l1) with {p=1;})==(\old(contents(l1) with {p=1;}))+(contents(l2) with {p=p;});
   list append(list l1,list l2){
+    // RECURSIVE: UNFOLD?
     list n = l1.next;
     if (l1==null){
      return l2;
     } else {
-    assert l1.state(1);
-    assume n!=null;
-    assert n.state(1);
-    assert Perm(l1.next,1);
-    assert Value(l1.next);
-    //  l1.next = l2;
-     l1.next=(append(l1.next,l2));// with {p = 1;});
+     l1.next=(append(l1.next,l2) with {p = p;});
      return l1;
     }
+
   }
- /* 
+ */
   given frac p;
-  requires l.state(p);
-  ensures l.state(p);
-  ensures \result==contents(l).length // DOES LENGTH EXIST ON SEQ(INT)??
+  requires p!=none && p<=write;
+  requires l->state(p);
+  ensures l->state(p);
+  ensures \result==|contents(l) with {p=p;}|;
   int getlength(list l){
     int res;
     if (l==null){
       res=0;
     } else {
+    unfold l.state(p);
       res=1+getlength(l.next) with { p = p; };
-    }
-    return res;
+    fold l.state(p); 
+    }  
+  return res;
   }
-*/
+
 }
