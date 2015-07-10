@@ -48,35 +48,44 @@ class tree {
     }
   fold state();
   }
-/*
+
+  requires state();
+  ensures state();
+  ensures mapf(contents(),\old(contents()));
   void map_parallel(){
     task t=new task(this);
     t.run();
-  }*/
+  }
 }
 class task {
   tree t;
-
-  resource state() = Value(t) ** t->state();
+  seq<int> oldcontents;
 
   requires t->state();
-  ensures state();
+  static seq<int> ct(tree t)= ((t==null) ? seq<int>{} : t.contents());    
+
+  requires t->state();
+  ensures t->state();
+  ensures Perm(this.t,1) ** Value(oldcontents) ** this.t==t ** this.oldcontents==ct(t) ** ct(t)==\old(ct(t));
   task(tree t){
     this.t=t;
-    fold state();
+   this.oldcontents=ct(t);
   }
 
-  requires state() ** t->state() ** Value(t.left) ** t.left.state();
-  ensures state() ** t->state() ** Value(t.left) ** t.left.state(); 
+  requires Perm(t,1/2) ** t->state() ** Value(oldcontents) ** oldcontents==ct(t);
+  ensures Perm(t,1/2) ** t->state() ** Value(oldcontents);
+  ensures t.mapf(ct(t),oldcontents);    // HOW TO DO THIS?
   void run(){
     if (t!=null) {
+    unfold t.state();
       task t1=new task(t.left);  fork t1;
       task t2=new task(t.right); fork t2;
-
       t.val=t.f(t.val);
 
       join t1;
       join t2;
+    fold t.state();
+
     }
   }
 }
